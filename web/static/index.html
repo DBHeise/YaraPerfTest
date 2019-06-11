@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang=en>
+<!-- קדש ליהוה -->
+
+<head>
+    <meta charset=utf-8>
+    <meta http-equiv=x-ua-compatible content="IE=edge">
+    <meta name=robots content="noindex, nofollow">
+    <meta name=author content=CrazyDave>
+    <meta name=version content=0.0.1>
+    <meta name=dedication content="קדש ליהוה">
+    <meta name=viewport content="width=device-width,initial-scale=1">
+    <title>Yara Tester</title>
+    <link href="css/bulma.min.css" rel="stylesheet" type="text/css" />
+    <script type="application/javascript" src="js/main.js"></script>
+</head>
+
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">Yara Tester</h1>
+            <form id="yara" action=".\Test" method="POST">
+                <div class="field">
+                    <label class="label">Yara Rule</label>
+                    <div class="control">
+                        <textarea id="yaraRule" class="textarea" placeholder="Yara Rule"></textarea>
+                    </div>
+                </div>
+                <div class="field is-grouped">
+                    <div class="control">
+                        <button class="button is-dark" onclick="TestRule(this)">Test</button>
+                    </div>
+                    <div class="control">
+                        <button class="button is-light" onclick="ClearRule(this)">Clear</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+</body>
+
+</html>

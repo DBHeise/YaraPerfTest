@@ -1,16 +1,39 @@
-//+build linux cgo
+//go:build linux || cgo
+// +build linux cgo
 
 package YaraPerfTest
 
 import (
-	"io/ioutil"
+	"bytes"
+	"fmt"
 	"os"
-	"time"
 	"path"
+	"time"
 
-	"github.com/hillu/go-yara"
+	"github.com/hillu/go-yara/v4"
 	log "github.com/sirupsen/logrus"
 )
+
+func printMatches(item string, m []yara.MatchRule, err error) {
+	if err != nil {
+		log.Printf("%s: error: %s", item, err)
+		return
+	}
+	if len(m) == 0 {
+		log.Printf("%s: no matches", item)
+		return
+	}
+	buf := &bytes.Buffer{}
+	fmt.Fprintf(buf, "%s: [", item)
+	for i, match := range m {
+		if i > 0 {
+			fmt.Fprint(buf, ", ")
+		}
+		fmt.Fprintf(buf, "%s:%s", match.Namespace, match.Rule)
+	}
+	fmt.Fprint(buf, "]")
+	log.Print(buf.String())
+}
 
 // RunYara - tests the yara rule against the files the given number of times
 func RunYara(yaraRuleFile string, numTimes int, testFolder string) ([]YaraResult, error) {
@@ -46,7 +69,7 @@ func RunYara(yaraRuleFile string, numTimes int, testFolder string) ([]YaraResult
 	log.Printf("Rule Compliation Time: %s", elapsed)
 
 	//Get files
-	files, err := ioutil.ReadDir(testFolder)
+	files, err := os.ReadDir(testFolder)
 	if err != nil {
 		log.Warn("Failed to get files in folder")
 		return nil, err
@@ -63,13 +86,14 @@ func RunYara(yaraRuleFile string, numTimes int, testFolder string) ([]YaraResult
 
 		for i := 0; i < numTimes; i++ {
 			start := time.Now()
-			hits, err := r.ScanFile(filename, 0, 0)
-			if firstHit == nil {
-				firstHit = hits
-			}
+			s, _ := yara.NewScanner(r)
+			var m yara.MatchRules
+			err := s.SetCallback(&m).ScanFile(filename)
+			printMatches(filename, m, err)
+
 			elapsed := time.Since(start)
 			if err != nil {
-				log.Warn("Error scanning file [%s]: %s", filename, err)
+				fmt.Printf("Error scanning file [%s]: %s\n", filename, err)
 				return nil, err
 			}
 			times[i] = float64(elapsed)
